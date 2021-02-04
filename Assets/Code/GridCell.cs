@@ -45,6 +45,9 @@ public class GridCell : MonoBehaviour
 	public CellState previewState;
 	public bool highlighted { get; private set; }
 
+	public Stack<CellState> stateHistory = new Stack<CellState>(HistoryUtils.historyLength);
+	public Stack<CellState> redoHistory = new Stack<CellState>(HistoryUtils.historyLength);
+
 	private void Awake()
 	{
 		previewState = CellState.NONE;
@@ -88,5 +91,33 @@ public class GridCell : MonoBehaviour
 		}
 
 		sprite.color = highlighted ? Color.Lerp(baseCol, highlightedTint, highlightStrength) : baseCol;
+	}
+
+	public void AddCurrentStateToHistory(bool clearRedoHistory = true)
+	{
+		if(clearRedoHistory)
+			redoHistory.Clear();
+		
+		if(stateHistory.Count == HistoryUtils.historyLength) //history full - remove oldest
+		{
+			stateHistory.RemoveOldest();
+		}
+		stateHistory.Push(state);
+	}
+	public void RecoverPreviousState()
+	{
+		if (stateHistory.Count > 0)
+		{
+			redoHistory.Push(state);
+			SetState(stateHistory.Pop());
+		}
+	}
+	public void RedoUndoneState()
+	{
+		if (redoHistory.Count > 0)
+		{
+			AddCurrentStateToHistory(false);
+			SetState(redoHistory.Pop());
+		}
 	}
 }

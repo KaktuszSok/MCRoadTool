@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class ShapeEraser : ShapeLine
 {
+
+	public override string GetName()
+	{
+		return "Eraser";
+	}
+
 	public override CellState[,] GetGridChanges(CellGrid grid)
 	{
 		CellState[,] array = new CellState[grid.bounds.x, grid.bounds.y];

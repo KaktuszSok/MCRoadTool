@@ -11,8 +11,24 @@ public abstract class RoadShape
 	int roadCache = 0;
 	int footpathCache = 0;
 
-	public CellState GetCellColour(Vector2Int pos) { return GetCellState(pos.x, pos.y); }
-	public abstract CellState GetCellState(int x, int y);
+	public abstract string GetName();
+
+	public float CalculateCellDistance(Vector2Int pos) { return CalculateCellDistance(pos.x, pos.y); }
+	public abstract float CalculateCellDistance(int x, int y);
+	public CellState GetCellState(Vector2Int pos) { return GetCellState(pos.x, pos.y); }
+	public virtual CellState GetCellState(int x, int y)
+	{
+		float dist = CalculateCellDistance(x, y);
+		if (dist * 2 < thickness)
+		{
+			if (dist <= 0.5f) return CellState.CENTRELINE;
+			else if (dist * 2 < thickness - footpathWidth * 2) return CellState.ROAD;
+			else return CellState.FOOTPATH;
+		}
+
+		return CellState.NONE;
+	}
+	public virtual void OnKeyDown() { }
 	public virtual void OnKeyHeld() 
 	{
 		if(PlayerInput.showAdvancedInfo)
@@ -22,6 +38,7 @@ public abstract class RoadShape
 	{
 		return "Thickness: " + thickness + "\nRoad: " + roadCache + "\nFootpath: " + footpathCache;
 	}
+	public virtual void OnKeyUp() { }
 
 	public virtual CellState[,] GetGridChanges(CellGrid grid)
 	{
@@ -75,6 +92,7 @@ public abstract class RoadShape
 
 	public void ApplyChanges(CellGrid grid)
 	{
+		grid.SaveToHistory();
 		CellState[,] changes = GetGridChanges(grid);
 		for (int y = 0; y < grid.bounds.y; y++)
 		{
@@ -84,5 +102,16 @@ public abstract class RoadShape
 					grid.cells[x, y].SetState(changes[x, y]);
 			}
 		}
+
+		OnAppliedChanges();
 	}
+	public virtual void OnAppliedChanges() { }
+
+	/// <returns>Position of new start point or (int.MinValue, int.MinValue) if it doesn't implement such custom behaviour </returns>
+	public virtual Vector2Int GetNewStartPoint() { return new Vector2Int(int.MinValue, int.MinValue); }
+
+	//for saving shape-specific runtime-persistent information (such as ShapeArc's tangent)
+	public virtual void SaveToHistory(bool clearRedoHistory = true) { }
+	public virtual void OnRedo() { }
+	public virtual void OnUndo() { }
 }

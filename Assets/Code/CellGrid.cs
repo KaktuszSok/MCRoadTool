@@ -57,6 +57,7 @@ public class CellGrid : MonoBehaviour
 
 	public void CleanseGrid()
 	{
+		SaveToHistory();
 		for (int y = 0; y < cells.GetLength(1); y++)
 		{
 			for (int x = 0; x < cells.GetLength(0); x++)
@@ -75,6 +76,40 @@ public class CellGrid : MonoBehaviour
 				cells[x, y].UpdateColour();
 			}
 		}
+	}
+
+	public void SaveToHistory(bool clearRedoHistory = true)
+	{
+		for (int y = 0; y < cells.GetLength(1); y++)
+		{
+			for (int x = 0; x < cells.GetLength(0); x++)
+			{
+				cells[x, y].AddCurrentStateToHistory(clearRedoHistory);
+			}
+		}
+		PlayerInput.SaveToHistory(clearRedoHistory);
+	}
+	public void Undo()
+	{
+		for (int y = 0; y < cells.GetLength(1); y++)
+		{
+			for (int x = 0; x < cells.GetLength(0); x++)
+			{
+				cells[x, y].RecoverPreviousState();
+			}
+		}
+		PlayerInput.Undo();
+	}
+	public void Redo()
+	{
+		for (int y = 0; y < cells.GetLength(1); y++)
+		{
+			for (int x = 0; x < cells.GetLength(0); x++)
+			{
+				cells[x, y].RedoUndoneState();
+			}
+		}
+		PlayerInput.Redo();
 	}
 
 	public void RealignCam()

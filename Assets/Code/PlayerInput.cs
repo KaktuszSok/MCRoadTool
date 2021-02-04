@@ -12,9 +12,11 @@ public class PlayerInput : MonoBehaviour
 	public static bool showAdvancedInfo = false;
 
 	public static GridCell currCell;
-	RoadShape roadShape;
+	public static Stack<Vector2Int> selectedHistory = new Stack<Vector2Int>(HistoryUtils.historyLength);
+	public static Stack<Vector2Int> selectedRedoHistory = new Stack<Vector2Int>(HistoryUtils.historyLength);
+	static RoadShape roadShape;
 
-	Dictionary<KeyCode, RoadShape> shapesDict = new Dictionary<KeyCode, RoadShape>();
+	public static Dictionary<KeyCode, RoadShape> shapesDict = new Dictionary<KeyCode, RoadShape>();
 
 	public static Vector2Int mousePos
 	{
@@ -30,6 +32,8 @@ public class PlayerInput : MonoBehaviour
 		shapesDict.Clear();
 		shapesDict.Add(KeyCode.L, new ShapeLine());
 		shapesDict.Add(KeyCode.E, new ShapeEraser());
+		shapesDict.Add(KeyCode.C, new ShapeCircle());
+		shapesDict.Add(KeyCode.A, new ShapeArc());
 	}
 
 	void Awake()
@@ -46,6 +50,7 @@ public class PlayerInput : MonoBehaviour
 		if(Input.GetKeyDown(KeyCode.Escape))
 		{
 			RoadShape.ClearPreview(grid);
+			if(roadShape != null) roadShape.OnKeyUp();
 			roadShape = null;
 
 			menu.ToggleOpen(!menu.isOpen);
@@ -63,29 +68,50 @@ public class PlayerInput : MonoBehaviour
 
 	void HandleNormalInput()
     {
-		if(Input.GetKeyDown(KeyCode.C) && Input.GetKey(KeyCode.LeftShift))
+		bool ctrlDown = false;
+		if(Input.GetKey(KeyCode.LeftControl) || Application.isEditor && Input.GetKey(KeyCode.RightShift)) //Control
 		{
-			grid.CleanseGrid();
+			ctrlDown = true;
+			if (Input.GetKeyDown(KeyCode.Z))
+			{
+				grid.Undo();
+			}
+			if (Input.GetKeyDown(KeyCode.Y))
+			{
+				grid.Redo();
+			}
 		}
-		if(Input.GetKeyDown(KeyCode.Period))
+		else if (Input.GetKey(KeyCode.LeftShift)) //Shift
 		{
-			CellStateExtensions.showCentreline = !CellStateExtensions.showCentreline;
-			grid.RefreshGrid();
+			if (Input.GetKeyDown(KeyCode.C))
+			{
+				grid.CleanseGrid();
+			}
 		}
-		if (Input.GetKeyDown(KeyCode.Comma))
+		else //No modifier key
 		{
-			showAdvancedInfo = !showAdvancedInfo;
-			grid.RefreshGrid();
+			if (Input.GetKeyDown(KeyCode.Period))
+			{
+				CellStateExtensions.showCentreline = !CellStateExtensions.showCentreline;
+				grid.RefreshGrid();
+			}
+			if (Input.GetKeyDown(KeyCode.Comma))
+			{
+				showAdvancedInfo = !showAdvancedInfo;
+				grid.RefreshGrid();
+			}
 		}
 
+		Vector2Int shapeNewStartpoint = new Vector2Int(int.MinValue, int.MinValue);
 		if (currCell != null)
 		{
 			foreach (KeyCode key in shapesDict.Keys)
 			{
-				if (Input.GetKeyDown(key))
+				if (Input.GetKeyDown(key) && !Input.GetKey(KeyCode.LeftShift) && !ctrlDown)
 				{
 					roadShape = shapesDict[key];
 					roadShape.startPoint = currCell.position;
+					roadShape.OnKeyDown();
 				}
 				if (Input.GetKey(key) && roadShape == shapesDict[key])
 				{
@@ -99,11 +125,13 @@ public class PlayerInput : MonoBehaviour
 					if(Input.GetMouseButtonDown(0))
 					{
 						roadShape.ApplyChanges(grid);
+						shapeNewStartpoint = roadShape.GetNewStartPoint();
 					}
 				}
 				if (Input.GetKeyUp(key) && roadShape == shapesDict[key])
 				{
 					RoadShape.ClearPreview(grid);
+					roadShape.OnKeyUp();
 					roadShape = null;
 				}
 			}
@@ -111,7 +139,11 @@ public class PlayerInput : MonoBehaviour
 
 		if (Input.GetMouseButtonDown(0))
 		{
-			HighlightCell(mousePos);
+			Vector2Int chosenCellPos = mousePos;
+			if (shapeNewStartpoint.x != int.MinValue)
+				chosenCellPos = shapeNewStartpoint;
+
+			HighlightCell(chosenCellPos, shapeNewStartpoint.x != int.MinValue);
 			if(roadShape != null && currCell != null)
 				roadShape.startPoint = currCell.position;
 		}
@@ -122,13 +154,13 @@ public class PlayerInput : MonoBehaviour
 
 	}
 
-	public void HighlightCell(Vector2Int pos)
+	public static void HighlightCell(Vector2Int pos, bool forceOn = false)
 	{
 		if (!grid.IsInBounds(pos)) return;
 	
 		//Deselect current cell
 		if (currCell) currCell.Highlight(false);
-		if (!currCell || currCell.position != pos) //we selected a different cell
+		if (!currCell || currCell.position != pos || forceOn) //we selected a different cell (or we force selecting the cell)
 		{
 			currCell = grid.cells[pos.x, pos.y];
 			currCell.Highlight(true);
@@ -136,6 +168,68 @@ public class PlayerInput : MonoBehaviour
 		else //we clicked the already selected cell, so we just wanted to deselect it
 		{
 			currCell = null;
+		}
+	}
+
+	public static void SaveToHistory(bool clearRedoHistory = true)
+	{
+		if (clearRedoHistory) //not called from a Redo(), make sure that tools save their states too
+		{
+			foreach (RoadShape tool in shapesDict.Values)
+			{
+				tool.SaveToHistory(clearRedoHistory);
+			}
+		}
+
+		if (clearRedoHistory)
+			selectedRedoHistory.Clear();
+
+		if (selectedHistory.Count == HistoryUtils.historyLength) //history full - remove oldest
+		{
+			selectedHistory.RemoveOldest();
+		}
+		if(currCell)
+			selectedHistory.Push(currCell.position);
+	}
+	public static void Undo()
+	{
+		foreach (RoadShape tool in shapesDict.Values)
+		{
+			tool.OnUndo();
+		}
+
+		RoadShape.ClearPreview(grid);
+		if (roadShape != null)
+		{
+			roadShape.OnKeyUp();
+			roadShape = null;
+		}
+
+		if (selectedHistory.Count > 0)
+		{
+			if(currCell)
+				selectedRedoHistory.Push(currCell.position);
+			HighlightCell(selectedHistory.Pop(), true);
+		}
+	}
+	public static void Redo()
+	{
+		foreach (RoadShape tool in shapesDict.Values)
+		{
+			tool.OnRedo();
+		}
+
+		RoadShape.ClearPreview(grid);
+		if (roadShape != null)
+		{
+			roadShape.OnKeyUp();
+			roadShape = null;
+		}
+
+		if (selectedRedoHistory.Count > 0)
+		{
+			SaveToHistory(false);
+			HighlightCell(selectedRedoHistory.Pop(), true);
 		}
 	}
 }
