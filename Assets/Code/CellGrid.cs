@@ -136,4 +136,15 @@ public class CellGrid : MonoBehaviour
 			return false;
 		return true;
 	}
+
+	public void ToggleChunkBorders(bool visible)
+	{
+		for (int y = 0; y < chunks.GetLength(1); y++)
+		{
+			for (int x = 0; x < chunks.GetLength(0); x++)
+			{
+				chunks[x, y].ToggleBorders(visible);
+			}
+		}
+	}
 }

@@ -23,7 +23,7 @@ public class PlayerInput : MonoBehaviour
 		get
 		{
 			Vector3 floatPos = cam.ScreenToWorldPoint(Input.mousePosition);
-			return new Vector2Int(Mathf.RoundToInt(Mathf.Clamp(floatPos.x, 0, grid.bounds.x-1)), Mathf.RoundToInt(Mathf.Clamp(floatPos.y, 0, grid.bounds.y-1)));
+			return new Vector2Int(Mathf.FloorToInt(Mathf.Clamp(floatPos.x, 0, grid.bounds.x-1)), Mathf.FloorToInt(Mathf.Clamp(floatPos.y, 0, grid.bounds.y-1)));
 		}
 	}
 
@@ -98,6 +98,7 @@ public class PlayerInput : MonoBehaviour
 			if (Input.GetKeyDown(KeyCode.Comma))
 			{
 				showAdvancedInfo = !showAdvancedInfo;
+				grid.ToggleChunkBorders(showAdvancedInfo);
 				grid.RefreshGrid();
 			}
 		}
@@ -120,7 +121,7 @@ public class PlayerInput : MonoBehaviour
 
 					if(Input.mouseScrollDelta.y > 0.1f || Input.mouseScrollDelta.y < -0.1f)
 					{
-						RoadShape.thickness = Mathf.Clamp(RoadShape.thickness + (1.0f * Mathf.Sign(Input.mouseScrollDelta.y)), 1.0f, grid.size);
+						RoadShape.thickness = Mathf.Clamp(RoadShape.thickness + (1.0f * Mathf.Sign(Input.mouseScrollDelta.y)), 1.0f, grid.size*CellChunk.chunkSize);
 					}
 					if(Input.GetMouseButtonDown(0))
 					{

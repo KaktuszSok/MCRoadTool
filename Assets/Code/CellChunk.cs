@@ -125,4 +125,9 @@ public class CellChunk : MonoBehaviour
 			}
 		}
 	}
+
+	public void ToggleBorders(bool visible)
+	{
+		GetComponent<LineRenderer>().enabled = visible;
+	}
 }

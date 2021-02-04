@@ -28,6 +28,7 @@ public class ShapeArc : RoadShape
 
 	public override void OnKeyDown()
 	{
+		alternateMode = false;
 		if(tangentLineEffect == null)
 		{
 			tangentLineEffect = GameObject.Instantiate(VisualsManager.instance.tangentLinePrefab).transform;
@@ -61,7 +62,7 @@ public class ShapeArc : RoadShape
 		if (tangent == Vector2.zero)
 			tangent = Vector2.right;
 		tangentLineEffect.right = tangent;
-		tangentLineEffect.position = new Vector3(startPoint.x, startPoint.y, tangentLineEffect.position.z);
+		tangentLineEffect.position = new Vector3(startPoint.x, startPoint.y, tangentLineEffect.position.z) + (Vector3)Vector2.one*0.5f;
 		Debug.DrawRay((Vector2)startPoint - tangent, tangent, Color.green);
 		Debug.DrawLine((Vector2)startPoint, (Vector2)endPoint, Color.red);
 

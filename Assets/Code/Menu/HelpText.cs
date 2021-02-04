@@ -20,11 +20,12 @@ public class HelpText : MonoBehaviour
 		+ "\tPress left-click to select cell\n"
 		+ "\tHold underlined key (as above) to select tool\n"
 		+ "\tPress left-click to use tool\n"
+		+ "\tScroll to change thickness\n"
 		+ "\tHold right-click for alternate mode\n"
 		+ "\tCtrl+Z - undo (max " + HistoryUtils.historyLength + ")\n"
 		+ "\tCtrl+Y - redo\n"
 		+ "\t. - toggle centreline\n"
-		+ "\t, - toggle advanced tooltips\n"
+		+ "\t, - toggle advanced tooltips and chunk borders\n"
 		+ "\nMCRoadTool v" + Application.version + " by KaktuszSok";
 	}
 
