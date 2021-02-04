@@ -15,7 +15,7 @@ public static class CellStateExtensions
 {
 	public static bool showCentreline = true;
 
-	public static Color ToColour(this CellState s)
+	public static Color32 ToColour(this CellState s)
 	{
 		switch (s)
 		{
@@ -26,30 +26,32 @@ public static class CellStateExtensions
 			case CellState.ROAD:
 				return Color.black;
 			case CellState.CENTRELINE:
-				return showCentreline ? Color.blue : CellState.ROAD.ToColour();
+				return showCentreline ? new Color32(0, 0, 255, 255) : CellState.ROAD.ToColour();
 			default:
 				return Color.magenta;
 		}
 	}
 }
 
-public class GridCell : MonoBehaviour
+public class GridCell
 {
-	static Color highlightedTint = Color.yellow;
+	static Color32 highlightedTint = new Color32(255, 255, 0, 255);
 	static float highlightStrength = 0.5f;
 
-	[SerializeField] SpriteRenderer sprite;
 	public Vector2Int position { get; private set; }
+	public CellChunk chunk { get; private set; }
 
 	public CellState state;
 	public CellState previewState;
 	public bool highlighted { get; private set; }
+	public Color32 colour = new Color32(0, 0, 0, 0);
 
 	public Stack<CellState> stateHistory = new Stack<CellState>(HistoryUtils.historyLength);
 	public Stack<CellState> redoHistory = new Stack<CellState>(HistoryUtils.historyLength);
 
-	private void Awake()
+	public void Awake(CellChunk ownerChunk)
 	{
+		chunk = ownerChunk;
 		previewState = CellState.NONE;
 		SetState(CellState.EMPTY);
 	}
@@ -57,7 +59,6 @@ public class GridCell : MonoBehaviour
 	public void SetPosition(int x, int y)
 	{
 		position = new Vector2Int(x, y);
-		transform.localPosition = (Vector2)position;
 	}
 
 	public void SetState(CellState newState)
@@ -80,17 +81,22 @@ public class GridCell : MonoBehaviour
 
 	public void UpdateColour()
 	{
-		Color baseCol = state.ToColour();
+		Color32 prevColour = colour;
+		Color32 baseCol = state.ToColour();
 		if(previewState != CellState.NONE)
 		{
 			baseCol = previewState.ToColour();
 			if(previewState != CellState.EMPTY)
 			{
-				baseCol *= 0.85f;
+				baseCol = new Color32((byte)(baseCol.r*0.85f), (byte)(baseCol.g * 0.85f), (byte)(baseCol.b * 0.85f), (byte)(baseCol.a * 0.85f));
 			}
 		}
 
-		sprite.color = highlighted ? Color.Lerp(baseCol, highlightedTint, highlightStrength) : baseCol;
+		colour = highlighted ? Color32.Lerp(baseCol, highlightedTint, highlightStrength) : baseCol;
+		if(!chunk.isDirty && colour.r != prevColour.r || colour.g != prevColour.g || colour.b != prevColour.b || colour.a != prevColour.a)
+		{
+			chunk.isDirty = true;
+		}
 	}
 
 	public void AddCurrentStateToHistory(bool clearRedoHistory = true)

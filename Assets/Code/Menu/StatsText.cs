@@ -9,16 +9,14 @@ public class StatsText : MonoBehaviour
 
 	public void RefreshStats()
 	{
-		GridCell[,] cells = CellGrid.instance.cells;
-
 		int road = 0;
 		int footpath = 0;
 
-		for (int y = 0; y < cells.GetLength(1); y++)
+		for (int y = 0; y < CellGrid.instance.bounds.y; y++)
 		{
-			for (int x = 0; x < cells.GetLength(0); x++)
+			for (int x = 0; x < CellGrid.instance.bounds.x; x++)
 			{
-				CellState state = cells[x, y].state;
+				CellState state = CellGrid.instance.GetCellAt(x, y).state;
 				if (state == CellState.ROAD || state == CellState.CENTRELINE)
 					road++;
 				else if (state == CellState.FOOTPATH)

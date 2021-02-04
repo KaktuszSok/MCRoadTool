@@ -159,10 +159,10 @@ public class PlayerInput : MonoBehaviour
 		if (!grid.IsInBounds(pos)) return;
 	
 		//Deselect current cell
-		if (currCell) currCell.Highlight(false);
-		if (!currCell || currCell.position != pos || forceOn) //we selected a different cell (or we force selecting the cell)
+		if (currCell != null) currCell.Highlight(false);
+		if (currCell == null || currCell.position != pos || forceOn) //we selected a different cell (or we force selecting the cell)
 		{
-			currCell = grid.cells[pos.x, pos.y];
+			currCell = grid.GetCellAt(pos.x, pos.y);
 			currCell.Highlight(true);
 		}
 		else //we clicked the already selected cell, so we just wanted to deselect it
@@ -188,7 +188,7 @@ public class PlayerInput : MonoBehaviour
 		{
 			selectedHistory.RemoveOldest();
 		}
-		if(currCell)
+		if(currCell != null)
 			selectedHistory.Push(currCell.position);
 	}
 	public static void Undo()
@@ -207,7 +207,7 @@ public class PlayerInput : MonoBehaviour
 
 		if (selectedHistory.Count > 0)
 		{
-			if(currCell)
+			if(currCell != null)
 				selectedRedoHistory.Push(currCell.position);
 			HighlightCell(selectedHistory.Pop(), true);
 		}

@@ -16,10 +16,11 @@ public class MenuSettings : MonoBehaviour
 
 	public void CreateNewMap()
 	{
-		int size = 100;
+		int size = 4;
 		string sizeInput = newMapSizeField.text;
 		int.TryParse(sizeInput, out size);
-		size = Mathf.Clamp(size, 15, 200);
+		size = Mathf.Clamp(size, 1, 16);
+		newMapSizeField.text = size.ToString();
 
 		CellGrid.instance.size = size;
 		CellGrid.instance.RegenerateGrid();

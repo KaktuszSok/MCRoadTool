@@ -1614,7 +1614,7 @@ MonoBehaviour:
   m_CharacterValidation: 2
   m_RegexValue: 
   m_GlobalPointSize: 14
-  m_CharacterLimit: 3
+  m_CharacterLimit: 2
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls: []
@@ -1642,7 +1642,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 64
+  m_Text: 4
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -4919,8 +4919,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73cd9c6e83c068b489c201a2112485f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellPrefab: {fileID: 3551889608322622506, guid: 35b4c096cc1510b46b457f6e3fab203f, type: 3}
-  size: 64
+  chunkPrefab: {fileID: 5923762095227024522, guid: e9362278a2b8bfe40b09b27c7721a1f8, type: 3}
+  size: 4
   aspectRatio: 1.7777778
 --- !u!114 &2025899014
 MonoBehaviour:

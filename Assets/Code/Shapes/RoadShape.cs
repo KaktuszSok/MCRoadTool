@@ -49,7 +49,7 @@ public abstract class RoadShape
 			for (int x = 0; x < grid.bounds.x; x++)
 			{
 				CellState newState = GetCellState(x, y);
-				if((int)newState > (int)grid.cells[x,y].state)
+				if((int)newState > (int)grid.GetCellAt(x,y).state)
 					array[x, y] = newState;
 			}
 		}
@@ -67,7 +67,7 @@ public abstract class RoadShape
 			for(int x = 0; x < grid.bounds.x; x++)
 			{
 				CellState newState = changes[x, y];
-				grid.cells[x, y].SetPreviewState(newState);
+				grid.GetCellAt(x, y).SetPreviewState(newState);
 
 				if (PlayerInput.showAdvancedInfo)
 				{
@@ -85,7 +85,7 @@ public abstract class RoadShape
 		{
 			for (int x = 0; x < grid.bounds.x; x++)
 			{
-				grid.cells[x, y].SetPreviewState(CellState.NONE);
+				grid.GetCellAt(x, y).SetPreviewState(CellState.NONE);
 			}
 		}
 	}
@@ -99,7 +99,7 @@ public abstract class RoadShape
 			for (int x = 0; x < grid.bounds.x; x++)
 			{
 				if(changes[x,y] != CellState.NONE)
-					grid.cells[x, y].SetState(changes[x, y]);
+					grid.GetCellAt(x, y).SetState(changes[x, y]);
 			}
 		}
 
