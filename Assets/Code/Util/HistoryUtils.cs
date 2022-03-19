@@ -1,21 +1,22 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-public static class HistoryUtils
+namespace Code.Util
 {
-	public const int historyLength = 10;
-
-    public static void RemoveOldest<T>(this Stack<T> history)
+	public static class HistoryUtils
 	{
-		if (history.Count == 0) return;
+		public const int historyLength = 10;
 
-		List<T> temp = new List<T>(history);
-		temp.RemoveAt(temp.Count - 1);
-		history.Clear();
-		for (int i = temp.Count - 1; i >= 0; i--)
+		public static void RemoveOldest<T>(this Stack<T> history)
 		{
-			history.Push(temp[i]);
+			if (history.Count == 0) return;
+
+			List<T> temp = new List<T>(history);
+			temp.RemoveAt(temp.Count - 1);
+			history.Clear();
+			for (int i = temp.Count - 1; i >= 0; i--)
+			{
+				history.Push(temp[i]);
+			}
 		}
 	}
 }

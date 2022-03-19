@@ -1,13 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class OpenLinkButton : MonoBehaviour
+namespace Code.Menu
 {
-	public string link = "";
-
-	public void OpenLink()
+	public class OpenLinkButton : MonoBehaviour
 	{
-		Application.OpenURL(link);
+		public string link = "";
+
+		public void OpenLink()
+		{
+			Application.OpenURL(link);
+		}
 	}
 }

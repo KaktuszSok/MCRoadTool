@@ -1,31 +1,45 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Code.Shapes;
 using TMPro;
+using UnityEngine;
 
-public class MenuSettings : MonoBehaviour
+namespace Code.Menu
 {
-	public TMP_InputField newMapSizeField;
-
-	public void SetFootpathWidth(string input)
+	public class MenuSettings : MonoBehaviour
 	{
-		float width = 2.0f;
-		float.TryParse(input, out width);
-		RoadShape.footpathWidth = width;
-	}
+		private const float defaultAspectRatio = 16f / 9f;
+		public TMP_InputField newMapSizeField;
 
-	public void CreateNewMap()
-	{
-		int size = 4;
-		string sizeInput = newMapSizeField.text;
-		int.TryParse(sizeInput, out size);
-		size = Mathf.Clamp(size, 1, 16);
-		newMapSizeField.text = size.ToString();
+		private void Start()
+		{
+			CellGrid.instance.onMapRegenerated += OnMapRegenerated;
+		}
 
-		CellGrid.instance.size = size;
-		CellGrid.instance.RegenerateGrid();
-		CellGrid.instance.RealignCam();
+		public void SetFootpathWidth(string input)
+		{
+			float width = 2.0f;
+			float.TryParse(input, out width);
+			RoadShape.footpathWidth = width;
+		}
 
-		PlayerInput.instance.menu.ToggleOpen(true);
+		public void CreateNewMap()
+		{
+			int size = 4;
+			string sizeInput = newMapSizeField.text;
+			int.TryParse(sizeInput, out size);
+			size = Mathf.Clamp(size, 1, 18);
+			newMapSizeField.text = size.ToString();
+
+			CellGrid.instance.size = size;
+			CellGrid.instance.aspectRatio = defaultAspectRatio;
+			CellGrid.instance.RegenerateGrid();
+			CellGrid.instance.RealignCam();
+
+			PlayerInput.instance.menu.ToggleOpen(true);
+		}
+
+		public void OnMapRegenerated(CellGrid grid)
+		{
+			newMapSizeField.text = grid.size.ToString();
+		}
 	}
 }

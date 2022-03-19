@@ -1,31 +1,33 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PauseMenu : MonoBehaviour
+namespace Code.Menu
 {
-	public bool isOpen { get; private set; }
-
-	private void Awake()
+	public class PauseMenu : MonoBehaviour
 	{
-		StartCoroutine(FixLayout());
-	}
+		public bool isOpen { get; private set; }
 
-	IEnumerator FixLayout()
-	{
-		yield return new WaitForEndOfFrame();
-
-		gameObject.SetActive(false);
-		gameObject.SetActive(true);
-	}
-
-	public void ToggleOpen(bool open)
-	{
-		isOpen = open;
-		if (open)
+		private void Awake()
 		{
-			GetComponentInChildren<StatsText>(true).RefreshStats();
+			StartCoroutine(FixLayout());
 		}
-		gameObject.SetActive(open);
+
+		IEnumerator FixLayout()
+		{
+			yield return new WaitForEndOfFrame();
+
+			gameObject.SetActive(false);
+			gameObject.SetActive(true);
+		}
+
+		public void ToggleOpen(bool open)
+		{
+			isOpen = open;
+			if (open)
+			{
+				GetComponentInChildren<StatsText>(true).RefreshStats();
+			}
+			gameObject.SetActive(open);
+		}
 	}
 }

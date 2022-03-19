@@ -1,51 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ShapeCircle : RoadShape
+namespace Code.Shapes
 {
-	/// <summary>
-	/// A point on the circle's circumference which will determine its radius
-	/// </summary>
-	protected Vector2Int centrePoint;
-	protected float radius { get; private set; }
-
-	protected bool alternateMode = false;
-
-	public override string GetName()
+	public class ShapeCircle : RoadShape
 	{
-		return "Circle";
-	}
+		/// <summary>
+		/// A point on the circle's circumference which will determine its radius
+		/// </summary>
+		protected Vector2Int centrePoint;
+		protected float radius { get; private set; }
 
-	public override void OnKeyHeld()
-	{
-		centrePoint = PlayerInput.mousePos;
-		radius = (startPoint - centrePoint).magnitude;
+		protected bool alternateMode = false;
 
-		if (Input.GetMouseButton(1))
-			alternateMode = true;
-		else
-			alternateMode = false;
-
-		if(alternateMode)
+		public override string GetName()
 		{
-			centrePoint = startPoint;
+			return "Circle";
 		}
 
-		base.OnKeyHeld();
-	}
-	public override float CalculateCellDistance(int x, int y)
-	{
-		float dx = x - centrePoint.x;
-		float dy = y - centrePoint.y;
-		return Mathf.Abs(Mathf.Sqrt(dx*dx + dy*dy) - radius); //distance from centreline of road
-	}
+		public override void OnKeyHeld()
+		{
+			centrePoint = PlayerInput.mousePos;
+			radius = (startPoint - centrePoint).magnitude;
 
-	public override Vector2Int GetNewStartPoint()
-	{
-		if (alternateMode)
-			return centrePoint;
-		else
-			return startPoint;
+			if (Input.GetMouseButton(1))
+				alternateMode = true;
+			else
+				alternateMode = false;
+
+			if(alternateMode)
+			{
+				centrePoint = startPoint;
+			}
+
+			base.OnKeyHeld();
+		}
+		public override float CalculateCellDistance(int x, int y)
+		{
+			float dx = x - centrePoint.x;
+			float dy = y - centrePoint.y;
+			return Mathf.Abs(Mathf.Sqrt(dx*dx + dy*dy) - radius); //distance from centreline of road
+		}
+
+		public override Vector2Int GetNewStartPoint()
+		{
+			if (alternateMode)
+				return centrePoint;
+			else
+				return startPoint;
+		}
 	}
 }

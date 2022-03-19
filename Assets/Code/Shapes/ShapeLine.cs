@@ -1,51 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ShapeLine : RoadShape
+namespace Code.Shapes
 {
-	protected Vector2Int endPoint;
-	protected Vector2 direction
+	public class ShapeLine : RoadShape
 	{
-		get
+		protected Vector2Int endPoint;
+		protected Vector2 direction
 		{
-			return endPoint - startPoint;
+			get
+			{
+				return endPoint - startPoint;
+			}
 		}
-	}
 
-	protected bool alternateMode = false;
+		protected bool alternateMode = false;
 
-	public override string GetName()
-	{
-		return "Line";
-	}
-
-	public override void OnKeyHeld()
-	{
-		endPoint = PlayerInput.mousePos;
-
-		if (Input.GetMouseButton(1))
-			alternateMode = true;
-		else
-			alternateMode = false;
-
-		base.OnKeyHeld();
-	}
-	public override float CalculateCellDistance(int x, int y)
-	{
-		Vector2 startToCell = new Vector2(x - startPoint.x, y - startPoint.y);
-		float t = Vector2.Dot(startToCell, direction) / direction.sqrMagnitude;
-		if (alternateMode) //cut off past endpoints
+		public override string GetName()
 		{
-			if (t < 0f || t > 1f) return Mathf.Infinity;
+			return "Line";
 		}
-		else //round past endpoints
+
+		public override void OnKeyHeld()
 		{
-			t = Mathf.Clamp(t, 0f, 1f);
+			endPoint = PlayerInput.mousePos;
+
+			if (Input.GetMouseButton(1))
+				alternateMode = true;
+			else
+				alternateMode = false;
+
+			base.OnKeyHeld();
 		}
-		Vector2 projection = startPoint + t*direction;
-		float dx = (x - projection.x);
-		float dy = (y - projection.y);
-		return Mathf.Sqrt(dx*dx + dy*dy);
+		public override float CalculateCellDistance(int x, int y)
+		{
+			Vector2 startToCell = new Vector2(x - startPoint.x, y - startPoint.y);
+			float t = Vector2.Dot(startToCell, direction) / direction.sqrMagnitude;
+			if (alternateMode) //cut off past endpoints
+			{
+				if (t < 0f || t > 1f) return Mathf.Infinity;
+			}
+			else //round past endpoints
+			{
+				t = Mathf.Clamp(t, 0f, 1f);
+			}
+			Vector2 projection = startPoint + t*direction;
+			float dx = (x - projection.x);
+			float dy = (y - projection.y);
+			return Mathf.Sqrt(dx*dx + dy*dy);
+		}
 	}
 }
