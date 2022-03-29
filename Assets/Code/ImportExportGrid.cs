@@ -18,7 +18,8 @@ namespace Code
             {
                 WriteMapData(grid, bw);
                 WriteGridData(grid, bw);
-            
+                WriteTerrainData(grid, bw);
+
                 bw.Write('0');
             }
             ms.Flush();
@@ -52,6 +53,18 @@ namespace Code
                 foreach (GridCell cell in gridChunk.cells)
                 {
                     bw.Write((byte)cell.state);
+                }
+            }
+        }
+        
+        private static void WriteTerrainData(CellGrid grid, BinaryWriter bw)
+        {
+            bw.Write('T');
+
+            foreach (CellChunk gridChunk in grid.chunks)
+            {
+                foreach (GridCell cell in gridChunk.cells)
+                {
                     bw.Write(cell.height);
                     bw.Write(cell.isGround);
                 }
@@ -77,6 +90,9 @@ namespace Code
                             break;
                         case 'G':
                             ReadGridData(grid, br);
+                            break;
+                        case 'T':
+                            ReadTerrainData(grid, br);
                             break;
                         default:
                             Debug.LogError($"Unknown data block: {c}. Terminating import.");
@@ -108,7 +124,17 @@ namespace Code
             {
                 foreach (GridCell cell in gridChunk.cells)
                 {
-                    cell.SetState((CellState)br.ReadByte(), false);
+                    cell.SetState((CellState)br.ReadByte(), true);
+                }
+            }
+        }
+        
+        private static void ReadTerrainData(CellGrid grid, BinaryReader br)
+        {
+            foreach (CellChunk gridChunk in grid.chunks)
+            {
+                foreach (GridCell cell in gridChunk.cells)
+                {
                     cell.SetHeight(br.ReadInt16(), false);
                     cell.SetGround(br.ReadBoolean(), true);
                 }
